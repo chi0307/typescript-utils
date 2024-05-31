@@ -1,3 +1,5 @@
+import typia from 'typia'
+
 type TypeChecker<StorageTyping> = {
   [k in keyof StorageTyping]: (data: unknown) => data is StorageTyping[k]
 }
@@ -7,9 +9,9 @@ type TypeChecker<StorageTyping> = {
  *
  * 功能:
  * 1. 確保進出 localStorage, sessionStorage 的型別是一樣的，在寫 code 的時候可以少思考型別問題
- * 2. 可以減少處理型別轉換問 (畢竟記錄都需要用 string 紀錄)
+ * 2. 可以減少處理型別轉換問題 (畢竟記錄都需要用 string 紀錄)
  * 3. 在型別不對的時候順手刪掉錯誤的型別資料
- * 4. 少思考目前 storage 有用到哪些 key
+ * 4. 減少思考目前 storage 有用到哪些 key
  */
 export class StorageManager<StorageTyping extends Record<string, unknown>> {
   private readonly _storage: Storage
@@ -64,18 +66,7 @@ const localStorageManager = new StorageManager<{
 }>(localStorage, {
   k1: (data): data is string => typeof data === 'string',
   k2: (data): data is number => typeof data === 'number',
-  k3: (data): data is K3 =>
-    typeof data === 'object' &&
-    Array.isArray(data) &&
-    data.every(
-      (item: unknown) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'id' in item &&
-        typeof item.id === 'number' &&
-        'name' in item &&
-        typeof item.name === 'string',
-    ),
+  k3: typia.is<K3>,
 })
 
 const sessionStorageManager = new StorageManager<{
